@@ -1,3 +1,8 @@
 .idea/
 ipynb_checkpoints/
 .DS_Store
+.cache/
+derby.log
+main/__pycache__/
+metastore_db/
+
