@@ -6,4 +6,4 @@ class Input:
         self.path = path
 
     def read(self):
-        return pd.read_csv(self.path)
+        return pd.read_csv(self.path).groupby(["userID", "timestamp", "itemID"]).sum().reset_index()

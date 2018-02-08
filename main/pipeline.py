@@ -52,7 +52,7 @@ class SciPyLearningPipeline(LearningPipeline):
         self.model_stage = SciPyModel(spec)
 
     def _set_eval_stage(self):
-        self.eval_stage = Evaluator()
+        self.eval_stage = Evaluator(self.model_stage)
 
     def _set_output_stage(self, output_path):
         self.output_stage = LearningOutput(output_path)
@@ -61,8 +61,8 @@ class SciPyLearningPipeline(LearningPipeline):
         dataset = self.input_stage.read()
         x_train, x_test, y_train, y_test = self.transform_stage.transform(dataset)
         self.model_stage.fit(x_train, y_train)
-        self.eval_stage.evaluate(x_test, y_test)
-        self.output_stage.write(model=self.model_stage, metrics="metrics")
+        metrics = self.eval_stage.evaluate(x_test, y_test)
+        self.output_stage.write(model=self.model_stage, metrics=metrics)
 
 
 class NaiveBayesLearningPipeline(SciPyLearningPipeline):

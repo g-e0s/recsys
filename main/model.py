@@ -74,8 +74,13 @@ class NaiveBayesModel(SciPyModel):
     def predict(self, x):
         prediction = pd.DataFrame()
         for item, clf in self.model.items():
-            scores = clf.predict_proba(x)[:, 1]
-            df = pd.DataFrame(np.vstack((x.index.values, scores)))
+            df = pd.DataFrame(list(x.index.ravel()), columns=x.index.names)
             df["itemID"] = item
-            prediction = pd.concat([prediction, df])
+            df["score"] = clf.predict_proba(x)[:, 1]
+            prediction = pd.concat([prediction, df.query("score > 0")])
+        prediction.reset_index(inplace=True)
+
+        # add rank
+        prediction["rank"] = prediction.groupby(["userID", "timestamp"])["score"].rank(method="first", ascending=False)
+        print(prediction.head())
         return prediction
