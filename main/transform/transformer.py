@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
-import pandas as pd
+
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-from main.input import Input
+from main.data_access_layer.input import Input
 
 
 class Transformer(metaclass=ABCMeta):

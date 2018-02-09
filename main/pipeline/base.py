@@ -1,11 +1,12 @@
 from abc import ABCMeta, abstractmethod
+
 from sklearn.naive_bayes import BernoulliNB
 
-from main.input import Input
-from main.evaluation import Evaluator
-from main.model import Model, SciPyModel, NaiveBayesModel
-from main.output import LearningOutput
-from main.transformer import LearningTransformer, SciPyLearningTransformer
+from main.data_access_layer.input import Input
+from main.data_access_layer.output import LearningOutput
+from main.evaluate.evaluation import Evaluator
+from main.model.model import Model, SciPyModel, NaiveBayesModel
+from main.transform.transformer import LearningTransformer, SciPyLearningTransformer
 
 
 class LearningPipeline(metaclass=ABCMeta):
@@ -98,8 +99,3 @@ class PredictingPipeline(metaclass=ABCMeta):
         self.model_stage.fit(x_train, y_train)
         self.eval_stage.evaluate(x_test, y_test)
         self.output_stage.write(output_path)
-
-if __name__ == "__main__":
-    pipeline = NaiveBayesLearningPipeline(input_path="/Users/g.sarapulov/MLProjects/playground/test_transactions.csv",
-                                          output_path="/Users/g.sarapulov/MLProjects/playground/", spec=BernoulliNB())
-    pipeline.run()

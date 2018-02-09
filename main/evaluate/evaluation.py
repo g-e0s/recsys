@@ -1,4 +1,6 @@
-NUM_ITEMS = len(open("items.txt", "r").read().split("\n"))
+import sklearn.metrics
+
+NUM_ITEMS = len(open("main/items.txt", "r").read().split("\n"))
 
 
 class Evaluator:
@@ -21,8 +23,7 @@ class Evaluator:
         merged["fn"] = ((merged["left"] == 1) & (merged["tp"] == 0)).astype("int")
         merged["fp"] = ((merged["right"] == 1) & (merged["tp"] == 0)).astype("int")
         merged["tn"] = NUM_ITEMS - merged["tp"] - merged["fp"] - merged["fn"]
-        # if k == 1:
-        #     print(merged.sort_values(["userID", "timestamp"]).head(20))
+
         merged = merged[["userID", "tp", "fp", "tn", "fn"]].groupby("userID").sum()
         merged["precision"] = merged["tp"] / (merged["tp"] + merged["fp"])
         merged["recall"] = merged["tp"] / (merged["tp"] + merged["fn"])
@@ -36,3 +37,26 @@ class Evaluator:
         metrics["recall"] = metrics["recall"] / n
         metrics["fpr"] = metrics["fpr"] / n
         return metrics.to_dict()
+
+    def binary_classification_metrics(self, x, y):
+        y_pred = self.model.predict(x) > 0.5
+        c = sklearn.metrics.confusion_matrix(y, y_pred)
+        tn = int(c[0, 0])
+        fp = int(c[0, 1])
+        fn = int(c[1, 0])
+        tp = int(c[1, 1])
+
+        all_zero = fn + tn == 0
+        all_one = fp + tp == 0
+
+        metrics = {
+            "TN": tn,
+            "FP": fp,
+            "FN": fn,
+            "TP": tp,
+            "precision": tp / (tp + fp) if not all_one else 0,
+            "recall": tp / (tp + fn),
+            "fpr": fp / (fp + tn),
+            "fnr": fn / (fn + tp)
+        }
+        return metrics
