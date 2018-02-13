@@ -15,20 +15,20 @@ class Input:
         elif reader == "spark":
             spark = SparkSession.builder.getOrCreate()
             schema = t.StructType([
-                t.StructField("userID", t.StringType()),
                 t.StructField("timestamp", t.LongType()),
+                t.StructField("userID", t.StringType()),
                 t.StructField("itemID", t.StringType()),
                 t.StructField("amount", t.DoubleType()),
                 t.StructField("discount", t.DoubleType())
             ])
-            df = spark.read.csv("file://" + self.path, schema=schema) \
-                .withColumn("orderDate", (f.col("timestamp") / 1000).cast("timestamp").cast("date")) \
-                .groupBy("userID", "itemID", "orderDate") \
-                .agg(f.sum(f.col("amount")).alias("amount"), f.sum(f.col("discount")).alias("discount"))
+            df = spark.read.csv("file://" + self.path, schema=schema)
             return df
 
     def get_iterator(self):
         return self.read(reader="spark") \
+            .withColumn("orderDate", (f.col("timestamp") / 1000).cast("timestamp").cast("date")) \
+            .groupBy("userID", "itemID", "orderDate") \
+            .agg(f.sum(f.col("amount")).alias("amount"), f.sum(f.col("discount")).alias("discount")) \
             .na.drop() \
             .groupBy("userID", "orderDate") \
             .agg(f.collect_list(f.struct("itemID", "amount")).alias("order")) \

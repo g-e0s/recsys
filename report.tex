@@ -1,0 +1,181 @@
+\documentclass{article}
+
+\usepackage{blindtext} % Package to generate dummy text throughout this template 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel} % Language hyphenation and typographical rules
+\usepackage{amssymb}
+%\usepackage[utf8]{inputenc}
+%\usepackage[sc]{mathpazo} % Use the Palatino font
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\linespread{1.05} % Line spacing - Palatino needs more space between lines
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+\usepackage[hmarginratio=4:3, top=20mm, left=30mm, columnsep=20pt]{geometry} % Document margins
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption} % Custom captions under/above floats in tables or figures
+\usepackage{booktabs} % Horizontal rules in tables
+
+\usepackage{lettrine} % The lettrine is the first enlarged letter at the beginning of the text
+
+\usepackage{enumitem} % Customized lists
+\setlist[itemize]{noitemsep} % Make itemize lists more compact
+
+\usepackage{abstract} % Allows abstract customization
+\renewcommand{\abstractnamefont}{\normalfont\bfseries} % Set the "Abstract" text to bold
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape} % Set the abstract itself to small italic text
+
+\usepackage{titlesec} % Allows customization of titles
+\renewcommand\thesection{\Roman{section}} % Roman numerals for the sections
+\renewcommand\thesubsection{\roman{subsection}} % roman numerals for subsections
+\titleformat{\section}[block]{\large\scshape\centering}{\thesection.}{1em}{} % Change the look of the section titles
+\titleformat{\subsection}[block]{\large}{\thesubsection.}{1em}{} % Change the look of the section titles
+
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyhead{} % Blank out the default header
+\fancyfoot{} % Blank out the default footer
+\fancyhead[C]{Running title $\bullet$ May 2016 $\bullet$ Vol. XXI, No. 1} % Custom header text
+\fancyfoot[RO,LE]{\thepage} % Custom footer text
+
+\usepackage{titling} % Customizing the title section
+
+\usepackage{hyperref} % For hyperlinks in the PDF
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} % Article title closing formatting
+\title{Рекомендательная система для ретейла: сравнение вероятностной и контентной моделей} % Article title
+\author{%
+\textsc{Сарапулов Г. В.} \\ % Your name
+%\textsc{John Smith}\thanks{A thank you or further information} \\[1ex] % Your name
+\normalsize Санкт-Петербургский государственный университет \\ % Your institution
+\normalsize Математико-механический факультет \\ % Your institution
+\normalsize \href{mailto:john@smith.com}{g-eos@yandex.ru} % Your email address
+%\and % Uncomment if 2 authors are required, duplicate these 4 lines if more
+%\textsc{Jane Smith}\thanks{Corresponding author} \\[1ex] % Second author's name
+%\normalsize University of Utah \\ % Second author's institution
+%\normalsize \href{mailto:jane@smith.com}{jane@smith.com} % Second author's email address
+}
+\date{\today} % Leave empty to omit a date
+\renewcommand{\maketitlehookd}{%
+\begin{abstract}
+%\noindent \blindtext % Dummy abstract text - replace \blindtext with your abstract text
+\noindent В работе проведено сравнение двух подходов к построению рекомендательной системы для продуктового ретейла: на основе вероятностной модели и на основе контента. В рамках первого подхода построена вероятностная модель для оценки вероятности покупки товарных групп в зависимости от предыдущих покупок. Для реализации второго подхода построены векторные представления для товарных групп из ассортимента торговой сети и покупательских корзин.
+\end{abstract}
+}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+% Print the title
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Введение}
+
+%\lettrine[nindent=0em,lines=3]{L} orem ipsum dolor sit amet, consectetur adipiscing elit.
+%\blindtext % Dummy text
+
+Обозначения:
+
+\begin{itemize}
+\item $U$ - множество субъектов (users, покупатели)
+\item $I$ - множество объектов (items, товары/товарные группы)
+\item $R$ - матрица оценок размера $|U| \times |I|$ (например, $R[u, i] = 1$, если покупатель $u$ купил товар $i$)
+\item $x_u$ - вектор признаков субъекта $u$ (демографические признаки, агрегационные данные)
+\item $x_i$ - вектор признаков объекта $i$ (характеристики товара)
+\item $f: U \times I \rightarrow \hat R$ - функция, сопоставляющая каждой паре $(u, i)$ оценку $\hat r_{u,i}$
+\item $L(R, \hat R)$ - функция потерь (например, кросс-энтропия или RMSE)
+ \end{itemize}
+ 
+Задача: сформировать список рекомендаций для всех объектов $u \in U$ через нахождение функции $f$, которая минимизирует функцию потерь
+
+\begin{equation}
+\label{eq:foo}
+f^* = argmin_f  L(R, \hat R)
+\end{equation}
+
+В качестве рекомендаций для каждого субъекта выбирается k объектов с наибольшими значениями $\hat r_{u,i}$
+
+%------------------------------------------------
+
+\section{Рекомендательная система на основе наивного байесовского классификатора}
+
+Для каждой товарной группы из ассортимента торговой сети строится модель классификации, оценивающая вероятность покупки данной товарной группы в зависимости от предыдущих покупок.
+Пусть $x^{u} = \{x^{u}_{1}, ..., x^{u}_{N}\}$ - вектор признаков покупателя $u$, построенный по истории транзакций, где $x^{u}_{i} = 1$, если покупатель $u$ покупал товар $i$, и $x^{u}_{i} = 0$в противном случае.
+
+%------------------------------------------------
+
+\section{Рекомендательная система на основе векторных представлений товарных групп}
+
+Для каждой товарной группы $i \in I$ из ассортимента торговой сети находим векторное представление $w^{i} \in \mathbb{R}^{K}$.
+
+%Text requiring further explanation\footnote{Example footnote}.
+
+%------------------------------------------------
+
+\section{Результаты}
+
+\begin{table}
+\caption{Точность рекомендательных систем (precision at k)}
+\centering
+\begin{tabular}{llr}
+\toprule
+\multicolumn{2}{r}{Precision at k} \\
+\cmidrule(r){1-3}
+Model & Precision at 1 & Precision at 3 \\
+\midrule
+Naive Bayes & $0.40$ & $0.35$ \\
+Item2Vec & $0.37$ & $0.32$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\blindtext % Dummy text
+
+\begin{equation}
+\label{eq:emc}
+e = mc^2
+\end{equation}
+
+\blindtext % Dummy text
+
+%------------------------------------------------
+
+\section{Discussion}
+
+\subsection{Subsection One}
+
+A statement requiring citation \cite{Figueredo:2009dg}.
+\blindtext % Dummy text
+
+\subsection{Subsection Two}
+
+\blindtext % Dummy text
+
+%----------------------------------------------------------------------------------------
+%	REFERENCE LIST
+%----------------------------------------------------------------------------------------
+
+\begin{thebibliography}{99} % Bibliography - this is intentionally simple in this template
+
+\bibitem[Figueredo and Wolf, 2009]{Figueredo:2009dg}
+Figueredo, A.~J. and Wolf, P. S.~A. (2009).
+\newblock Assortative pairing and life history strategy - a cross-cultural
+  study.
+\newblock {\em Human Nature}, 20:317--330.
+ 
+\end{thebibliography}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

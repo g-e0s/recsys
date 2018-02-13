@@ -8,6 +8,7 @@ RARE_DAYS_THRESHOLD = 3
 MAX_SKIPS = 2
 
 
+
 class ItemUserImage:
     def __init__(self):
         pass
@@ -88,12 +89,13 @@ class ItemUserImage:
             for timestep in range(user.shape[0] - HIST_DAYS - FRC_DAYS):
                 x = user[timestep:timestep + HIST_DAYS, :NUM_ITEMS, :]
                 y = user[timestep + HIST_DAYS:timestep + HIST_DAYS + FRC_DAYS, :, 0].sum() == 0
-                if self.is_regular(x):
-                    reg_x.append(x)
-                    reg_y.append(y)
-                else:
-                    irreg_x.append(x)
-                    irreg_y.append(y)
+                if x.sum() > 0:
+                    if self.is_regular(x):
+                        reg_x.append(x)
+                        reg_y.append(~y)
+                    else:
+                        irreg_x.append(x)
+                        irreg_y.append(y)
         xr_train, xr_test, yr_train, yr_test = train_test_split(np.array(reg_x), np.array(reg_y), train_size=ratio)
         xi_train, xi_test, yi_train, yi_test = train_test_split(np.array(irreg_x), np.array(irreg_y), train_size=ratio)
         return (xr_train, xr_test, yr_train, yr_test), (xi_train, xi_test, yi_train, yi_test)
