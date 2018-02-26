@@ -5,6 +5,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english,russian]{babel} % Language hyphenation and typographical rules
 \usepackage{amssymb}
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\usepackage{indentfirst}
 %\usepackage[utf8]{inputenc}
 %\usepackage[sc]{mathpazo} % Use the Palatino font
 \usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
@@ -34,7 +37,7 @@
 \pagestyle{fancy} % All pages have headers and footers
 \fancyhead{} % Blank out the default header
 \fancyfoot{} % Blank out the default footer
-\fancyhead[C]{Running title $\bullet$ May 2016 $\bullet$ Vol. XXI, No. 1} % Custom header text
+% \fancyhead[C]{Running title $\bullet$ May 2016 $\bullet$ Vol. XXI, No. 1} % Custom header text
 \fancyfoot[RO,LE]{\thepage} % Custom footer text
 
 \usepackage{titling} % Customizing the title section
@@ -65,7 +68,8 @@
 \renewcommand{\maketitlehookd}{%
 \begin{abstract}
 %\noindent \blindtext % Dummy abstract text - replace \blindtext with your abstract text
-\noindent В работе проведено сравнение двух подходов к построению рекомендательной системы для продуктового ретейла: на основе вероятностной модели и на основе контента. В рамках первого подхода построена вероятностная модель для оценки вероятности покупки товарных групп в зависимости от предыдущих покупок. Для реализации второго подхода построены векторные представления для товарных групп из ассортимента торговой сети и покупательских корзин.
+
+В работе проведено сравнение двух подходов к построению рекомендательной системы для продуктового ретейла: на основе вероятностной модели (model-based) и на основе содержания (content-based). В рамках первого подхода построена вероятностная модель для оценки вероятности покупки товарных групп в зависимости от предыдущих покупок. Для реализации второго подхода построены векторные представления для товарных групп из ассортимента торговой сети и покупательских корзин.
 \end{abstract}
 }
 
@@ -81,12 +85,9 @@
 %----------------------------------------------------------------------------------------
 
 \section{Введение}
-
-%\lettrine[nindent=0em,lines=3]{L} orem ipsum dolor sit amet, consectetur adipiscing elit.
-%\blindtext % Dummy text
-
-Обозначения:
-
+Рекомендательные системы предназначены для предсказания того, какие объекты могут быть интересны пользователю. Их сферы применения обширны (новостные и мультимедийные сервисы, поисковые системы, e-commerce и т. д.), и на фоне последних достижений в этой области и роста вычислительных мощностей и накопленных данных в последнее десятилетие наблюдается рост интереса бизнеса к таким системам. \par
+В работе рассмотрены подходы к построению рекомендательной системы для продуктового ретейла и проведена их сравнительная оценка на чековых данных одной из торговых сетей. В секции II рассмотрен подход составления рекомендаций на основе ранжирования товаров по вероятности покупки в зависимости от наличия других товаров в корзине покупателя, для чего использовался наивный байесовский классификатор. В секции III использован альтернативный подход, заключающийся в рекомендации товаров, похожих на приобретенные ранее. Для этой цели были построены векторные представления товаров и покупательских корзин, и список рекомендаций ранжировался по мере близости вектора товара к вектору-корзине. В секции IV приведена оценка моделей по оффлайн-метрикам (точность, покрытие). \par
+В тексте приняты следующие обозначения:
 \begin{itemize}
 \item $U$ - множество субъектов (users, покупатели)
 \item $I$ - множество объектов (items, товары/товарные группы)
@@ -109,16 +110,41 @@ f^* = argmin_f  L(R, \hat R)
 %------------------------------------------------
 
 \section{Рекомендательная система на основе наивного байесовского классификатора}
-
-Для каждой товарной группы из ассортимента торговой сети строится модель классификации, оценивающая вероятность покупки данной товарной группы в зависимости от предыдущих покупок.
-Пусть $x^{u} = \{x^{u}_{1}, ..., x^{u}_{N}\}$ - вектор признаков покупателя $u$, построенный по истории транзакций, где $x^{u}_{i} = 1$, если покупатель $u$ покупал товар $i$, и $x^{u}_{i} = 0$в противном случае.
-
+Пусть $x_{u} = \{x_{u,1}, ..., x_{u,N}\}$ - вектор признаков покупателя $u$, построенный по истории транзакций, где $x^{u}_{i} = 1$, если покупатель $u$ покупал товар $i$, и $x^{u}_{i} = 0$ в противном случае.
+Для каждого товара $i \in I$ обучается классификатор $f_i: X_u \rightarrow [0, 1]$, оценивающий вероятность покупки товара $i$ в зависимости от предыдущих покупок, представленных вектором $x_u$:
+\begin{equation}
+P(y_i = 1 | x_u) = \frac{P(y_i = 1) \cdot P(x_u | y_i = 1)}{P(x_u)}
+\end{equation}
+Наиболее релевантным товаром является тот, вероятность покупки которого максимальна:
+%$f: U \times I \rightarrow [0, 1]$, 
+\begin{equation}
+i^* = \argmax_{i \in I \setminus I_u} f_i(x_u)
+%i^* = \argmax_{j \in I \setminus I_u} f(u, j)
+\end{equation}
+Для оценки вероятностей покупки товара $i$ используем наивный байесовский классификатор:
+\begin{equation}
+%P(y_i = 1 | x_u) = \frac{P(y_i = 1) \cdot P(x_u | y_i = 1)}{P(x_u)}
+P(y_i = 1 | x_u) = \frac{P(y_i = 1) \cdot \prod_{j=1}^N P(x_{u, j} | y_i = 1)}{\prod_{j=1}^N P(x_{u, j})}
+\end{equation}
 %------------------------------------------------
 
 \section{Рекомендательная система на основе векторных представлений товарных групп}
+\newcommand{\tfidf}{\ensuremath{\textit{TF-IDF}}}
 
-Для каждой товарной группы $i \in I$ из ассортимента торговой сети находим векторное представление $w^{i} \in \mathbb{R}^{K}$.
+Для каждой товарной группы $i \in I$ из ассортимента торговой сети находим векторное представление $q_i = \{q_{i,1}, ..., q_{i,K}\} \in \mathbb{R}^{K}$. В простейшем случае каждое слово представляется вектором $q_i$, в котором $q_{i, j} = 1$, где $j$ - индекс слова $i$ в словаре $I$, а остальные элементы вектора равны нулю (т.н. one-hot encoding). Более продинутым подходом к получению векторных представлений является Word2Vec\footnote{Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean. Efficient Estimation of Word Representations in Vector Space // In Proceedings of Workshop at ICLR, 2013}, который и был использован в работе.  \par
+Из полученных векторных представлений товаров можно получить векторные представления покупательских корзин, например, через взвешенное среднее входящих в корзину векторов-товаров. В качестве весов берутся TF-IDF \footnote{Salton, G.: Automatic Text Processing. Addison-Wesley (1989)} веса:
+\begin{equation}
+\tfidf (t_k, d_j) = \frac{f_{k, j}}{\max_z f_{z,j} } \cdot \log \frac{N}{n_k}
+\end{equation}
+где $f_{k,j}$ - частота встречания слова $t_k$ в документе $d_j$, $n_k$ - кол-в документов, где встречается слово $t_k$. Адаптируя этот подход для оценки весов товаров в корзине покупателя, примем за $f_{k,j}$ долю расходов на товар $i_k$ в суммарных расходах покупателя $u_j$, за $\frac{n_k}{N}$ - долю товара $i_k$ в обороте торговой сети. Веса дополнительно нормализуются:
+\begin{equation}
+w_{k,j} = \frac{\tfidf (t_k, d_j)}{\sqrt{\sum_s^{|T|}\tfidf (t_s, d_j)^2}}
+\end{equation}
 
+Для поиска похожих товаров используется ранжирование по косинусной мере:
+\begin{equation}
+sim(d_i, d_j) = \frac{\sum_k w_{k, i} \cdot w_{k, j}}{ \sqrt{\sum_k w_{k, i}^2 \cdot \sum_k w_{k, j}^2}}
+\end{equation}
 %Text requiring further explanation\footnote{Example footnote}.
 
 %------------------------------------------------
@@ -140,27 +166,10 @@ Item2Vec & $0.37$ & $0.32$ \\
 \end{tabular}
 \end{table}
 
-\blindtext % Dummy text
-
-\begin{equation}
-\label{eq:emc}
-e = mc^2
-\end{equation}
-
-\blindtext % Dummy text
 
 %------------------------------------------------
 
-\section{Discussion}
 
-\subsection{Subsection One}
-
-A statement requiring citation \cite{Figueredo:2009dg}.
-\blindtext % Dummy text
-
-\subsection{Subsection Two}
-
-\blindtext % Dummy text
 
 %----------------------------------------------------------------------------------------
 %	REFERENCE LIST
@@ -168,12 +177,13 @@ A statement requiring citation \cite{Figueredo:2009dg}.
 
 \begin{thebibliography}{99} % Bibliography - this is intentionally simple in this template
 
-\bibitem[Figueredo and Wolf, 2009]{Figueredo:2009dg}
-Figueredo, A.~J. and Wolf, P. S.~A. (2009).
-\newblock Assortative pairing and life history strategy - a cross-cultural
-  study.
-\newblock {\em Human Nature}, 20:317--330.
- 
+\bibitem[Mikolov et all, 2013]{}
+Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean. (2013)
+\newblock Efficient Estimation of Word Representations in Vector Space.
+\newblock {\em In Proceedings of Workshop at ICLR}
+
+\bibitem[Pennington et all]{}
+Jeffrey Pennington, Richard Socher, and Christopher D. Manning. GloVe: Global Vectors for Word Representation. 2014
 \end{thebibliography}
 
 %----------------------------------------------------------------------------------------

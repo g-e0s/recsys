@@ -1,0 +1,88 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel} % Language hyphenation and typographical rules
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\linespread{1.05} % Line spacing - Palatino needs more space between lines
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+\usepackage[hmarginratio=4:3, top=20mm, left=30mm, columnsep=20pt]{geometry} % Document margins
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption} % Custom captions under/above floats in tables or figures
+\usepackage{booktabs} % Horizontal rules in tables
+\usepackage{lettrine} % The lettrine is the first enlarged letter at the beginning of the text
+\usepackage{enumitem} % Customized lists
+\setlist[itemize]{noitemsep} % Make itemize lists more compact
+
+\usepackage{titlesec} % Allows customization of titles
+\titleformat{\subsection}[block]{\large}{\thesubsection.}{1em}{} % Change the look of the section titles
+\usepackage{titling} % Customizing the title section
+
+\usepackage{hyperref} % For hyperlinks in the PDF
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\setlength{\droptitle}{-4\baselineskip} % Move the title up
+
+\pretitle{\begin{center}\Huge\bfseries} % Article title formatting
+\posttitle{\end{center}} % Article title closing formatting
+\title{Recommender systems review} % Article title
+\author{%
+\textsc{Sarapulov G. V.} \\ % Your name
+%\textsc{John Smith}\thanks{A thank you or further information} \\[1ex] % Your name
+\normalsize Saint-Petersburg State University \\ % Your institution
+\normalsize \href{mailto:john@smith.com}{g-eos@yandex.ru} % Your email address
+}
+\date{\today} % Leave empty to omit a date
+\renewcommand{\maketitlehookd}{%
+}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+% Print the title
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Collaborative Filtering for Implicit Feedback Datasets}
+\subsection{Vocabulary}
+\begin{itemize}
+\item implicit feedback - неявная обратная связь
+\item substantial - существенный
+\item 
+
+\end{itemize}
+
+\begin{equation}
+\label{eq:foo}
+f^* = argmin_f  L(R, \hat R)
+\end{equation}
+
+
+%------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	REFERENCE LIST
+%----------------------------------------------------------------------------------------
+
+\begin{thebibliography}{99} % Bibliography - this is intentionally simple in this template
+
+\bibitem[Yifan Hu et all, 2008]{}
+Yifan Hu , Yehuda Koren , Chris Volinsky, Collaborative Filtering for Implicit Feedback Datasets, Proceedings of the 2008 Eighth IEEE International Conference on Data Mining, p.263-272, December 15-19, 2008
+
+\bibitem[Pennington et all]{}
+Jeffrey Pennington, Richard Socher, and Christopher D. Manning. GloVe: Global Vectors for Word Representation. 2014
+\end{thebibliography}
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

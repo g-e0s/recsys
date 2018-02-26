@@ -5,4 +5,8 @@ ipynb_checkpoints/
 derby.log
 */__pycache__/*
 metastore_db/
-
+# reports
+*.out
+*.log
+*.aux
+*synctex.gz
