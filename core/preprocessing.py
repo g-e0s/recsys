@@ -27,7 +27,8 @@ class ClassRSPreprocessor(Transformer):
         self.min_ratings = min_ratings
 
     def transform(self, data):
-        x, y = self.one_hot_encoder.transform(data.xy_split(self.split, self.min_ratings))
+        # x, y = self.one_hot_encoder.transform(data.leave_k_out(k=2, time_aware=False))
+        x, y = self.one_hot_encoder.transform(data.session_holdout(min_sessions=3))
         return x, y
 
 

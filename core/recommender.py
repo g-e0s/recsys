@@ -20,7 +20,7 @@ class Recommender(Model):
         raise NotImplementedError
 
     def validate(self, data):
-        x, y = data.xy_split()
+        x, y = data.session_holdout()
         prediction = self.predict(x)
         metrics = self.evaluator.evaluate(y, prediction)
         print(pd.DataFrame.from_dict(metrics, orient='index').drop(['tp', 'fp', 'tn', 'fn'], axis=1))

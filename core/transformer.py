@@ -52,11 +52,11 @@ class ParallelTransformer(CompositeTransformer):
 
 class Pipeline(SequentialTransformer):
 
-    def fit(self, data):
+    def fit(self, data, k=1):
         output = data
         for transformer in self.transformers:
             if transformer._transformer_type == 'model':
-                transformer.fit(output)
+                transformer.fit(output, k=k)
             else:
                 output = transformer.transform(output)
         return self
