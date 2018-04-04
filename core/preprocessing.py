@@ -40,8 +40,11 @@ class MFPreprocessor(Transformer):
         self.min_ratings = min_ratings
         self.ratings = None
 
-    def transform(self, data):
-        m = coo_matrix((data.amount, (data.itemID, data.userID)))
-        m.data = np.ones(len(m.data))
+    def transform(self, data, alpha=40):
+        d = data.dataframe.pivot_table(index=['userID', 'itemID'], values=['timestamp', 'amount'],
+                                       aggfunc={'timestamp': np.mean, 'amount': np.size}).reset_index()
+
+        m = coo_matrix((1 + alpha * d.amount, (d.itemID, d.userID)))
+        # m.data = 1 + alpha * d.amount # np.ones(len(m.data))
         m = m.tocsr()
         return m

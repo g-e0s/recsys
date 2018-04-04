@@ -16,11 +16,11 @@ dataset = Dataset(pd.read_csv(INPUT_PATH))
 train, test = dataset.train_test_split()
 
 # define model set
-model_set = ClassificationRecommender('nb-set')
-for item in train.items.itemID:
-    model_set.add(SciPyModel(name='nb_model_{}'.format(item), spec=BernoulliNB()))
+# model_set = ClassificationRecommender('nb-set')
+# for item in train.items.itemID:
+#     model_set.add(SciPyModel(name='nb_model_{}'.format(item), spec=BernoulliNB()))
 
-# model_set = FactorizationRecommender('als', ALSRecommender(factors=8, regularization=0.01, iterations=30))
+model_set = FactorizationRecommender('als', ALSRecommender(factors=8, regularization=0.01, iterations=30))
 
 # build pipeline
 pipeline = Pipeline('nb_recommender')
@@ -29,7 +29,7 @@ pipeline.add(model_set)
 # run pipeline
 pipeline.fit(train)
 pipeline.validate(test)
-pipeline.predict(dataset).query('rank <= 5') \
-    .merge(dataset.users, on='userID') \
-    .merge(dataset.items, on='itemID')[['user', 'item', 'score', 'rank']] \
-    .to_csv(OUTPUT_PATH, index=False)
+# pipeline.predict(dataset).query('rank <= 5') \
+#     .merge(dataset.users, on='userID') \
+#     .merge(dataset.items, on='itemID')[['user', 'item', 'score', 'rank']] \
+#     .to_csv(OUTPUT_PATH, index=False)
