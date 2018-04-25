@@ -70,11 +70,11 @@ class Pipeline(SequentialTransformer):
                 output = transformer.transform(output)
         return output
 
-    def validate(self, data):
+    def validate(self, data, filtered_items=None):
         output = data
         for transformer in self.transformers:
             if transformer._transformer_type == 'model':
-                output = transformer.validate(output)
+                output = transformer.validate(output, filtered_items)
             else:
                 output = transformer.transform(output)
         return output

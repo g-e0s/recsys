@@ -3,9 +3,13 @@ import pandas as pd
 
 
 class Dataset:
-    def __init__(self, dataframe, items=None, users=None):
+    def __init__(self, dataframe, items=None, users=None,
+                 user_col='user', item_col='item', rating_col='amount', ts_col='timestamp'):
+        renaming_map = {
+            user_col: 'user',item_col:'item',rating_col:'amount',ts_col:'timestamp'
+        }
         if items is None:
-            self.dataframe, self.users, self.items = self._encode(dataframe)
+            self.dataframe, self.users, self.items = self._encode(dataframe.rename(columns=renaming_map))
         else:
             self.dataframe, self.users, self.items = dataframe, users, items
         self.userID = self.dataframe.userID
@@ -13,14 +17,23 @@ class Dataset:
         self.timestamp = self.dataframe.timestamp
         self.amount = self.dataframe.amount
 
-    def _encode(self, dataframe):
+    def _encode(self, dataframe, item_col='item', user_col='user'):
         def _enc(field, idx_name):
-            return dataframe[[field]].drop_duplicates() \
+            # validate field
+            if not isinstance(field, (str, list, tuple, set)):
+                raise ValueError('unsupported field type: {}'.format(type(field)))
+            col_idx = [field] if isinstance(field, str) else list(field)
+            return dataframe[col_idx].drop_duplicates() \
                 .reset_index().drop('index', axis=1).reset_index().rename(columns={'index': idx_name})
-        users = _enc('user', 'userID')
-        items = _enc('item', 'itemID')
-        encoded = dataframe.merge(users, on='user').merge(items, on='item').drop(['user', 'item'], axis=1)
-        return encoded, users, items
+
+        try:
+            users = _enc(user_col, 'userID')
+            items = _enc(item_col, 'itemID')
+            dropped_columns = [user_col, item_col] if isinstance(item_col, str) else [user_col] + item_col
+            encoded = dataframe.merge(users, on=user_col).merge(items, on=item_col).drop(dropped_columns, axis=1)
+            return encoded, users, items
+        except KeyError as err:
+            print(dataframe.columns, err)
 
     def leave_k_out(self, k=1, time_aware=True, min_hist=3):
         enough_ratings = self.dataframe.groupby('userID')['itemID'].transform(pd.Series.count) >= min_hist + k

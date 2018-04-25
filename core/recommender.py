@@ -4,6 +4,7 @@ from core.transformer import Transformer, ParallelTransformer
 from core.preprocessing import ClassRSPreprocessor, MFPreprocessor
 from core.evaluation import Evaluator
 from core.model import Model
+from core.dataset import Dataset
 
 
 class Recommender(Model):
@@ -19,9 +20,21 @@ class Recommender(Model):
     def recommend_for_item(self, item_id, n):
         raise NotImplementedError
 
-    def validate(self, data):
+    def validate(self, data, filtered_items=None):
+        def _filter(df):
+            if filtered_items:
+                item_idx = data.items.itemID[~data.items.item.isin(filtered_items)]
+                if isinstance(df, pd.DataFrame):
+                    return df[df.itemID.isin(item_idx)]
+                elif isinstance(df, Dataset):
+                    _df = df.dataframe
+                    return Dataset(_df[_df.itemID.isin(item_idx)], items=data.items, users=data.users)
+            else:
+                return df
+
         x, y = data.session_holdout()
-        prediction = self.predict(x)
+        y = _filter(y)
+        prediction = _filter(self.predict(x))
         metrics = self.evaluator.evaluate(y, prediction)
         print(pd.DataFrame.from_dict(metrics, orient='index').drop(['tp', 'fp', 'tn', 'fn'], axis=1))
         return metrics
@@ -55,9 +68,6 @@ class ClassificationRecommender(ParallelTransformer, Recommender):
             df["score"] = model.predict(preprocessed)
             prediction = pd.concat([prediction, df])
         prediction.reset_index(inplace=True)
-
-        # add rank
-        prediction["rank"] = prediction.groupby("userID")["score"].rank(method="first", ascending=False).astype(int)
         return prediction.drop('index', axis=1)
 
 

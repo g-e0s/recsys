@@ -14,7 +14,10 @@ class Evaluator:
         num_items = len(set(list(true.itemID) + list(pred.itemID)))
         left = true.dataframe.copy()
         left["left"] = 1
-        right = pred.query("rank <= {}".format(k))
+        right = pred.copy()
+        # add rank
+        right["rank"] = pred.groupby("userID")["score"].rank(method="first", ascending=False).astype(int)
+        right = right.query("rank <= {}".format(k))
         right["right"] = 1
         merged = left.merge(right, on=["userID", "itemID"], how="outer")
         merged["tp"] = (merged["left"] == merged["right"]).astype("int")
